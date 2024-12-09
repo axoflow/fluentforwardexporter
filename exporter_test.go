@@ -18,7 +18,9 @@ import (
 func TestNewExporter(t *testing.T) {
 	config := &Config{
 		TCPClientSettings: TCPClientSettings{
-			Endpoint:          validEndpoint,
+			Endpoint: Endpoint{
+				TCPAddr: validEndpoint,
+			},
 			ConnectionTimeout: time.Second * 30,
 		},
 	}
@@ -37,7 +39,9 @@ func TestNewExporter(t *testing.T) {
 func TestStart(t *testing.T) {
 	config := &Config{
 		TCPClientSettings: TCPClientSettings{
-			Endpoint:          validEndpoint,
+			Endpoint: Endpoint{
+				TCPAddr: validEndpoint,
+			},
 			ConnectionTimeout: time.Second * 30,
 		},
 	}
@@ -62,7 +66,10 @@ func TestStartInvalidEndpointErrorLog(t *testing.T) {
 
 	config := &Config{
 		TCPClientSettings: TCPClientSettings{
-			Endpoint:          "invalidEndpoint",
+			Endpoint: Endpoint{
+				TCPAddr:               "invalidEndpoint",
+				ValidateTCPResolution: true,
+			},
 			ConnectionTimeout: time.Second * 30,
 		},
 	}

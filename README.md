@@ -22,7 +22,8 @@ Forward is the protocol used by Fluentd to route message between peers.
 
 | Property | Default value | Type | Description |
 |---|---|---|---|
-| endpoint |  | string | **MANDATORY** Target URL to send `Forward` log streams to |
+| endpoint.tcp_addr |  | string | **MANDATORY** Target URL to send `Forward` log streams to |
+| endpoint.validate_tcp_resolution | false | bool | Controls whether to validate the tcp address and fail at startup. |
 | connection_timeout | 30s | time.Duration | Maximum amount of time a dial will wait for a connect to complete |
 | tls.insecure | true | bool | If set to **true**, the connexion is not secured with TLS. |
 | tls.insecure_skip_verify | false | bool | Controls whether the exporter verifies the server's certificate chain and host name. If **true**, any certificate is accepted and any host name. This mode is susceptible to man-in-the-middle attacks |
@@ -34,6 +35,8 @@ Forward is the protocol used by Fluentd to route message between peers.
 | tag | "tag" | string | Fluentd tag is a string separated by '.'s (e.g. myapp.access), and is used as the directions for Fluentd's internal routing engine |
 | compress_gzip | false | bool | Transparent data compression. You can use this feature to reduce the transferred payload size |
 | default_labels_enabled | true | map[string]bool | If omitted then default labels will be added. If one of the labels is omitted then this label will be added |
+| kubernetes_metadata.key |  | string | KubernetesMetadata includes kubernetes metadata as a nested object. It leverages resources attributes provided by k8sattributesprocessor |
+| kubernetes_metadata.include_pod_labels |  | bool | Whether pod labels should be added to the nested object |
 
 See the default values in the method `createDefaultConfig()` in [factory.go](factory.go) file.
 
@@ -42,7 +45,8 @@ Example, for `default_labels_enabled` that will add only the `time` attribute in
 ```yaml
 exporters:
   fluentforward:
-    endpoint: a.new.fluentforward.target:24224
+    endpoint:
+      tcp_addr: a.new.fluentforward.target:24224
     connection_timeout: 10s
     require_ack: true
     tag: nginx
@@ -59,7 +63,8 @@ Example with TLS enabled and shared key:
 ```yaml
 exporters:
   fluentforward:
-    endpoint: a.new.fluentforward.target:24224
+    endpoint:
+      tcp_addr: a.new.fluentforward.target:24224
     connection_timeout: 10s
     tls:
       insecure: false
@@ -71,7 +76,8 @@ Example with mutual TLS authentication (mTLS):
 ```yaml
 exporters:
   fluentforward:
-    endpoint: a.new.fluentforward.target:24224
+    endpoint:
+      tcp_addr: a.new.fluentforward.target:24224
     connection_timeout: 10s
     tls:
       insecure: false
@@ -93,7 +99,8 @@ Example usage:
 ```yaml
 exporters:
   fluentforward:
-    endpoint: a.new.fluentforward.target:24224
+    endpoint:
+      tcp_addr: a.new.fluentforward.target:24224
     connection_timeout: 10s
     retry_on_failure:
       enabled: true
