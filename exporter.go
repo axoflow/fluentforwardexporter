@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	fclient "github.com/IBM/fluent-forward-go/fluent/client"
 	"github.com/IBM/fluent-forward-go/fluent/protocol"
+	fproto "github.com/IBM/fluent-forward-go/fluent/protocol"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -86,7 +88,7 @@ func (f *fluentforwardExporter) connectForward() {
 
 func (f *fluentforwardExporter) pushLogData(ctx context.Context, ld plog.Logs) error {
 	// move for loops into a translator
-	entries := []protocol.EntryExt{}
+	entries := []fproto.EntryExt{}
 	rls := ld.ResourceLogs()
 	for i := 0; i < rls.Len(); i++ {
 		ills := rls.At(i).ScopeLogs()
@@ -95,8 +97,8 @@ func (f *fluentforwardExporter) pushLogData(ctx context.Context, ld plog.Logs) e
 			logs := ills.At(j).LogRecords()
 			for k := 0; k < logs.Len(); k++ {
 				log := logs.At(k)
-				entry := protocol.EntryExt{
-					Timestamp: protocol.EventTimeNow(),
+				entry := fproto.EntryExt{
+					Timestamp: fproto.EventTimeNow(),
 					Record:    f.convertLogToMap(log, rls.At(i)),
 				}
 				entries = append(entries, entry)
@@ -113,16 +115,24 @@ func (f *fluentforwardExporter) pushLogData(ctx context.Context, ld plog.Logs) e
 func (f *fluentforwardExporter) convertLogToMap(lr plog.LogRecord, res plog.ResourceLogs) map[string]interface{} {
 	// move function into a translator
 	m := make(map[string]interface{})
-	m["severity"] = lr.SeverityText()
-	m["message"] = lr.Body().AsString()
-	for key, val := range f.config.DefaultLabelsEnabled {
-		if val {
-			attribute, found := lr.Attributes().Get(key)
-			if found {
-				m[key] = attribute.AsString()
+	for k, v := range f.config.DefaultLabelsEnabled {
+		if v {
+			switch k {
+			case "level":
+				m[k] = lr.SeverityText()
+			case "message":
+				m[k] = lr.Body().AsString()
+			case "timestamp":
+				m[k] = lr.Timestamp().AsTime().UTC().Format(time.RFC3339Nano)
 			}
 		}
 	}
+
+	lr.Attributes().Range(func(k string, v pcommon.Value) bool {
+		m[k] = v.AsString()
+		return true
+	})
+
 	if f.config.KubernetesMetadata != nil {
 		key := f.config.KubernetesMetadata.Key
 		if f.config.KubernetesMetadata.Key == "" {
@@ -175,7 +185,7 @@ func (f *fluentforwardExporter) convertLogToMap(lr plog.LogRecord, res plog.Reso
 
 type sendFunc func(string, protocol.EntryList) error
 
-func (f *fluentforwardExporter) send(sendMethod sendFunc, entries []protocol.EntryExt) error {
+func (f *fluentforwardExporter) send(sendMethod sendFunc, entries []fproto.EntryExt) error {
 	err := sendMethod(f.config.Tag, entries)
 	// sometimes the connection is lost, we try to reconnect and send the data again
 	if err != nil {
@@ -192,10 +202,10 @@ func (f *fluentforwardExporter) send(sendMethod sendFunc, entries []protocol.Ent
 	return nil
 }
 
-func (f *fluentforwardExporter) sendCompressed(entries []protocol.EntryExt) error {
+func (f *fluentforwardExporter) sendCompressed(entries []fproto.EntryExt) error {
 	return f.send(f.client.SendCompressed, entries)
 }
 
-func (f *fluentforwardExporter) sendForward(entries []protocol.EntryExt) error {
+func (f *fluentforwardExporter) sendForward(entries []fproto.EntryExt) error {
 	return f.send(f.client.SendForward, entries)
 }

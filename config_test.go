@@ -55,10 +55,9 @@ func TestLoadConfigNewExporter(t *testing.T) {
 				Tag:          "tag",
 				CompressGzip: false,
 				DefaultLabelsEnabled: map[string]bool{
-					"time":     true,
-					"exporter": true,
-					"job":      true,
-					"instance": true,
+					"timestamp": true,
+					"level":     true,
+					"message":   true,
 				},
 				BackOffConfig: configretry.BackOffConfig{
 					Enabled:             true,
