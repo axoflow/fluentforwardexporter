@@ -3,14 +3,14 @@ module github.com/axoflow/fluentforwardexporter
 go 1.24.0
 
 require (
-	github.com/IBM/fluent-forward-go v0.2.2
+	github.com/IBM/fluent-forward-go v0.3.0
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/collector/component v0.120.0
 	go.opentelemetry.io/collector/component/componenttest v0.120.0
 	go.opentelemetry.io/collector/config/configretry v1.26.0
 	go.opentelemetry.io/collector/config/configtls v1.26.0
-	go.opentelemetry.io/collector/confmap v1.24.0
+	go.opentelemetry.io/collector/confmap v1.26.0
 	go.opentelemetry.io/collector/exporter v0.120.0
 	go.opentelemetry.io/collector/pdata v1.26.0
 	go.opentelemetry.io/otel/metric v1.34.0
