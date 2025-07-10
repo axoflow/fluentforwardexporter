@@ -70,8 +70,8 @@ func TestLoadConfigNewExporter(t *testing.T) {
 				},
 				QueueBatchConfig: exporterhelper.QueueBatchConfig{
 					Enabled:      true,
-					NumConsumers: 2,
-					QueueSize:    10,
+					NumConsumers: 10,
+					QueueSize:    1000,
 					Sizer:        exporterhelper.RequestSizerTypeRequests,
 				},
 			},
