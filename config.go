@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/config/configoptional"
 	"go.opentelemetry.io/collector/config/configretry"
 	"go.opentelemetry.io/collector/config/configtls"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
@@ -69,7 +70,7 @@ type Config struct {
 	KubernetesMetadata *KubernetesMetadata `mapstructure:"kubernetes_metadata,omitempty"`
 
 	configretry.BackOffConfig `mapstructure:"retry_on_failure"`
-	QueueBatchConfig          exporterhelper.QueueBatchConfig `mapstructure:"sending_queue"`
+	QueueConfig               configoptional.Optional[exporterhelper.QueueBatchConfig] `mapstructure:"sending_queue"`
 }
 
 // Endpoint defines the address of the server to connect to.
@@ -89,7 +90,7 @@ var _ component.Config = (*Config)(nil)
 
 // Validate checks if the configuration is valid
 func (config *Config) Validate() error {
-	if err := config.QueueBatchConfig.Validate(); err != nil {
+	if err := config.QueueConfig.Validate(); err != nil {
 		return fmt.Errorf("queue settings has invalid configuration: %w", err)
 	}
 
