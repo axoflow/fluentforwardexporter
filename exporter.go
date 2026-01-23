@@ -66,7 +66,10 @@ func (f *fluentforwardExporter) start(ctx context.Context, host component.Host) 
 
 func (f *fluentforwardExporter) stop(context.Context) (err error) {
 	f.wg.Wait()
-	return f.client.Disconnect()
+	if f.client != nil {
+		return f.client.Disconnect()
+	}
+	return nil
 }
 
 // connectForward connects to the Fluent Forward endpoint and keep running otel even if the connection is failing

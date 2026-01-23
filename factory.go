@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/config/configoptional"
 	"go.opentelemetry.io/collector/config/configretry"
 	"go.opentelemetry.io/collector/config/configtls"
 	"go.opentelemetry.io/collector/exporter"
@@ -55,8 +56,8 @@ func createDefaultConfig() component.Config {
 			"level":     true,
 			"message":   true,
 		},
-		BackOffConfig:    configretry.NewDefaultBackOffConfig(),
-		QueueBatchConfig: exporterhelper.NewDefaultQueueConfig(),
+		BackOffConfig: configretry.NewDefaultBackOffConfig(),
+		QueueConfig:   configoptional.Some(exporterhelper.NewDefaultQueueConfig()),
 	}
 }
 
@@ -72,7 +73,7 @@ func createLogsExporter(ctx context.Context, set exporter.Settings, config compo
 		// explicitly disable since we rely on net.Dialer timeout logic.
 		exporterhelper.WithTimeout(exporterhelper.TimeoutConfig{Timeout: 0}),
 		exporterhelper.WithRetry(exporterConfig.BackOffConfig),
-		exporterhelper.WithQueue(exporterConfig.QueueBatchConfig),
+		exporterhelper.WithQueue(exporterConfig.QueueConfig),
 		exporterhelper.WithStart(exp.start),
 		exporterhelper.WithShutdown(exp.stop),
 	)

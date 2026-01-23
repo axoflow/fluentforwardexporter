@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/config/configoptional"
 	"go.opentelemetry.io/collector/config/configretry"
 	"go.opentelemetry.io/collector/config/configtls"
 	"go.opentelemetry.io/collector/confmap/confmaptest"
@@ -68,12 +69,12 @@ func TestLoadConfigNewExporter(t *testing.T) {
 					RandomizationFactor: backoff.DefaultRandomizationFactor,
 					Multiplier:          backoff.DefaultMultiplier,
 				},
-				QueueBatchConfig: exporterhelper.QueueBatchConfig{
-					Enabled:      true,
+				QueueConfig: configoptional.Some(exporterhelper.QueueBatchConfig{
 					NumConsumers: 10,
 					QueueSize:    1000,
 					Sizer:        exporterhelper.RequestSizerTypeRequests,
-				},
+					Batch:        exporterhelper.NewDefaultQueueConfig().Batch,
+				}),
 			},
 		},
 	}
@@ -102,10 +103,9 @@ func TestConfigValidate(t *testing.T) {
 		{
 			desc: "QueueSettings are invalid",
 			cfg: &Config{
-				QueueBatchConfig: exporterhelper.QueueBatchConfig{
+				QueueConfig: configoptional.Some(exporterhelper.QueueBatchConfig{
 					QueueSize: -1,
-					Enabled:   true,
-				},
+				}),
 			},
 			err: fmt.Errorf("queue settings has invalid configuration"),
 		},
