@@ -1,6 +1,6 @@
 module github.com/axoflow/fluentforwardexporter
 
-go 1.26.0
+go 1.25.0
 
 require (
 	github.com/IBM/fluent-forward-go v0.4.0
